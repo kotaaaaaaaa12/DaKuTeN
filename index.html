@@ -6,22 +6,29 @@
     <title>濁点・半濁点ジェネレーター</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 500px; }
+        .container { width: 100%; max-width: 500px; position: relative; }
         textarea { width: 100%; height: 150px; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; position: relative; }
         button { padding: 10px; cursor: pointer; border: none; background: #333; color: white; border-radius: 5px; }
-        .full-width { grid-column: span 2; }
+        .full-width { grid-column: span 2; position: relative; }
         #output { width: 100%; min-height: 100px; padding: 10px; background: white; border: 1px solid #ccc; box-sizing: border-box; word-break: break-all; overflow-wrap: break-word; margin-top: 10px; }
+        
+        /* ぴょこっと出るメッセージのスタイル */
+        #popup { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 5px 10px; border-radius: 5px; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; font-size: 14px; }
+        #popup::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: #333 transparent transparent; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>濁点・半濁点生成</h2>
-        <textarea id="input" placeholder="ここになんか叫べ..."></textarea>
+        <textarea id="input" placeholder="ここに入力…"></textarea>
         <div class="controls">
             <button onclick="generate('\u3099')">濁点付与</button>
             <button onclick="generate('\u309A')">半濁点付与</button>
-            <button class="full-width" onclick="copyText()">コピー</button>
+            <div class="full-width" style="position: relative;">
+                <button style="width: 100%;" onclick="copyText()">コピー</button>
+                <div id="popup">コピーしました！</div>
+            </div>
             <button class="full-width" onclick="clearText()" style="background: #a33;">全部消す</button>
         </div>
         <div id="output"></div>
@@ -30,6 +37,7 @@
     <script>
         const input = document.getElementById('input');
         const output = document.getElementById('output');
+        const popup = document.getElementById('popup');
 
         function generate(mark) {
             const text = input.value;
@@ -39,7 +47,8 @@
         function copyText() {
             if (!output.textContent) return;
             navigator.clipboard.writeText(output.textContent).then(() => {
-                alert('コピーしたで！');
+                popup.style.opacity = 1;
+                setTimeout(() => { popup.style.opacity = 0; }, 1500);
             });
         }
 
