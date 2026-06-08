@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>濁点・半濁点ジェネレーター</title>
+    <title>極限濁点ジェネレーター</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 500px; position: relative; }
-        textarea { width: 100%; height: 150px; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
+        .container { width: 100%; max-width: 500px; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
+        .options { margin-bottom: 10px; background: white; padding: 10px; border-radius: 5px; }
         .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; position: relative; }
         button { padding: 10px; cursor: pointer; border: none; background: #333; color: white; border-radius: 5px; }
-        .full-width { grid-column: span 2; position: relative; }
-        #output { width: 100%; min-height: 100px; padding: 10px; background: white; border: 1px solid #ccc; box-sizing: border-box; word-break: break-all; overflow-wrap: break-word; margin-top: 10px; }
-        
-        /* ぴょこっと出るメッセージのスタイル */
-        #popup { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 5px 10px; border-radius: 5px; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; font-size: 14px; }
-        #popup::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-width: 5px 5px 0; border-style: solid; border-color: #333 transparent transparent; }
+        #output { width: 100%; min-height: 100px; padding: 10px; background: white; border: 1px solid #ccc; box-sizing: border-box; word-break: break-all; margin-top: 10px; }
+        #popup { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 5px 10px; border-radius: 5px; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>濁点・半濁点生成</h2>
+        <h2>極限濁点ジェネレーター</h2>
         <textarea id="input" placeholder="ここに入力…"></textarea>
+        
+        <div class="options">
+            <label><input type="radio" name="mode" value="full" checked> 全角</label>
+            <label><input type="radio" name="mode" value="half"> 半角</label><br>
+            <label><input type="checkbox" id="includeSymbols" checked> 記号・スペースにも付与</label>
+        </div>
+
         <div class="controls">
             <button onclick="generate('\u3099')">濁点付与</button>
             <button onclick="generate('\u309A')">半濁点付与</button>
-            <div class="full-width" style="position: relative;">
+            <div style="position: relative; grid-column: span 2;">
                 <button style="width: 100%;" onclick="copyText()">コピー</button>
                 <div id="popup">コピーしました！</div>
             </div>
-            <button class="full-width" onclick="clearText()" style="background: #a33;">全部消す</button>
+            <button style="grid-column: span 2; background: #a33;" onclick="clearText()">全部消す</button>
         </div>
         <div id="output"></div>
     </div>
@@ -41,7 +45,22 @@
 
         function generate(mark) {
             const text = input.value;
-            output.textContent = text.split('').map(char => char + mark).join('');
+            const isHalf = document.querySelector('input[name="mode"]:checked').value === 'half';
+            const includeSymbols = document.getElementById('includeSymbols').checked;
+            
+            // 記号や空白の定義
+            const symbols = /[\!\?\.\,\s\(\)\[\]\{\}\uff01\uff1f\u3001\u3002\u3000]/;
+
+            output.textContent = text.split('').map(char => {
+                if (!includeSymbols && symbols.test(char)) return char;
+                
+                let combined = char + mark;
+                if (isHalf) {
+                    // 全角文字を無理やり半角にする処理（簡易版）
+                    return combined.normalize('NFKC');
+                }
+                return combined;
+            }).join('');
         }
 
         function copyText() {
