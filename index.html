@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>濁点ジェネレーター</title>
+    <title>濁点・半濁点ジェネレーター</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 500px; }
         textarea { width: 100%; height: 150px; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
-        .controls { display: flex; gap: 10px; margin-bottom: 10px; }
-        button { padding: 10px 20px; cursor: pointer; border: none; background: #333; color: white; border-radius: 5px; }
-        button:active { background: #555; }
-        #output { width: 100%; min-height: 100px; padding: 10px; background: white; border: 1px solid #ccc; box-sizing: border-box; word-break: break-all; overflow-wrap: break-word; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        button { padding: 10px; cursor: pointer; border: none; background: #333; color: white; border-radius: 5px; }
+        .full-width { grid-column: span 2; }
+        #output { width: 100%; min-height: 100px; padding: 10px; background: white; border: 1px solid #ccc; box-sizing: border-box; word-break: break-all; overflow-wrap: break-word; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>濁点ジェネレーター</h2>
+        <h2>濁点・半濁点生成</h2>
         <textarea id="input" placeholder="ここになんか叫べ..."></textarea>
         <div class="controls">
-            <button onclick="copyText()">コピー</button>
-            <button onclick="clearText()">全部消す</button>
+            <button onclick="generate('\u3099')">濁点付与</button>
+            <button onclick="generate('\u309A')">半濁点付与</button>
+            <button class="full-width" onclick="copyText()">コピー</button>
+            <button class="full-width" onclick="clearText()" style="background: #a33;">全部消す</button>
         </div>
         <div id="output"></div>
     </div>
@@ -29,12 +31,13 @@
         const input = document.getElementById('input');
         const output = document.getElementById('output');
 
-        input.addEventListener('input', () => {
+        function generate(mark) {
             const text = input.value;
-            output.textContent = text.split('').map(char => char + '\u3099').join('');
-        });
+            output.textContent = text.split('').map(char => char + mark).join('');
+        }
 
         function copyText() {
+            if (!output.textContent) return;
             navigator.clipboard.writeText(output.textContent).then(() => {
                 alert('コピーしたで！');
             });
