@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極限濁点ジェネレーター</title>
+    <title>濁点・半濁点ジェネレーター</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 500px; }
@@ -17,18 +17,23 @@
 </head>
 <body>
     <div class="container">
-        <h2>極限濁点ジェネレーター</h2>
+        <h2>濁点・半濁点ジェネレーター</h2>
         <textarea id="input" placeholder="ここに入力…"></textarea>
         
         <div class="options">
-            <label><input type="radio" name="mode" value="full" checked> 全角</label>
-            <label><input type="radio" name="mode" value="half"> 半角</label><br>
-            <label><input type="checkbox" id="includeSymbols" checked> 記号・スペースにも付与</label>
+            <div>
+                <strong>濁点の幅:</strong>
+                <label><input type="radio" name="width" value="full" checked> 全角 (U+3099/309A)</label>
+                <label><input type="radio" name="width" value="half"> 半角 (U+FF9E/FF9F)</label>
+            </div>
+            <div style="margin-top: 5px;">
+                <label><input type="checkbox" id="includeSymbols" checked> 記号・空白も対象にする</label>
+            </div>
         </div>
 
         <div class="controls">
-            <button onclick="generate('\u3099')">濁点付与</button>
-            <button onclick="generate('\u309A')">半濁点付与</button>
+            <button onclick="generate('dakuten')">濁点付与</button>
+            <button onclick="generate('handakuten')">半濁点付与</button>
             <div style="position: relative; grid-column: span 2;">
                 <button style="width: 100%;" onclick="copyText()">コピー</button>
                 <div id="popup">コピーしました！</div>
@@ -43,23 +48,23 @@
         const output = document.getElementById('output');
         const popup = document.getElementById('popup');
 
-        function generate(mark) {
+        function generate(type) {
             const text = input.value;
-            const isHalf = document.querySelector('input[name="mode"]:checked').value === 'half';
+            const isHalf = document.querySelector('input[name="width"]:checked').value === 'half';
             const includeSymbols = document.getElementById('includeSymbols').checked;
             
-            // 記号や空白の定義
+            // 濁点: 全角U+3099 / 半角U+FF9E
+            // 半濁点: 全角U+309A / 半角U+FF9F
+            const marks = {
+                dakuten: isHalf ? '\uFF9E' : '\u3099',
+                handakuten: isHalf ? '\uFF9F' : '\u309A'
+            };
+            const mark = marks[type];
             const symbols = /[\!\?\.\,\s\(\)\[\]\{\}\uff01\uff1f\u3001\u3002\u3000]/;
 
             output.textContent = text.split('').map(char => {
                 if (!includeSymbols && symbols.test(char)) return char;
-                
-                let combined = char + mark;
-                if (isHalf) {
-                    // 全角文字を無理やり半角にする処理（簡易版）
-                    return combined.normalize('NFKC');
-                }
-                return combined;
+                return char + mark;
             }).join('');
         }
 
