@@ -23,8 +23,8 @@
         <div class="options">
             <div>
                 <strong>濁点の幅:</strong>
-                <label><input type="radio" name="width" value="full" checked> 全角 (U+3099/309A)</label>
-                <label><input type="radio" name="width" value="half"> 半角 (U+FF9E/FF9F)</label>
+                <label><input type="radio" name="width" value="half" checked> 半角 (結合文字)</label>
+                <label><input type="radio" name="width" value="full"> 全角 (独立文字)</label>
             </div>
             <div style="margin-top: 5px;">
                 <label><input type="checkbox" id="includeSymbols" checked> 記号・空白も対象にする</label>
@@ -50,14 +50,13 @@
 
         function generate(type) {
             const text = input.value;
-            const isHalf = document.querySelector('input[name="width"]:checked').value === 'half';
+            const isFull = document.querySelector('input[name="width"]:checked').value === 'full';
             const includeSymbols = document.getElementById('includeSymbols').checked;
             
-            // 濁点: 全角U+3099 / 半角U+FF9E
-            // 半濁点: 全角U+309A / 半角U+FF9F
+            // 半角(結合文字)なら U+3099/309A、全角(独立文字)なら U+FF9E/FF9F
             const marks = {
-                dakuten: isHalf ? '\uFF9E' : '\u3099',
-                handakuten: isHalf ? '\uFF9F' : '\u309A'
+                dakuten: isFull ? '\uFF9E' : '\u3099',
+                handakuten: isFull ? '\uFF9F' : '\u309A'
             };
             const mark = marks[type];
             const symbols = /[\!\?\.\,\s\(\)\[\]\{\}\uff01\uff1f\u3001\u3002\u3000]/;
